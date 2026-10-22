@@ -72,6 +72,7 @@ def test_replay_drops_and_truncates_a_torn_last_entry(wal, wal_path):
         b'{"op": "set", "key": null, "value": "b"}\n',  # Key is null
         b'{"op": "set", "key": 5, "value": "b"}\n',  # Key is not a string
         b'{"op": "set", "key": "b", "value": [1, 2]}\n',  # Value is not a string
+        b'{"op": "delete", "key": 5}\n',  # Delete key is not a string
     ],
 )
 def test_replay_recovers_from_malformed_entry(wal, wal_path, malformed):
@@ -93,6 +94,16 @@ def test_replay_recovers_from_malformed_entry(wal, wal_path, malformed):
         SetEntry(key="a", value="1"),
         SetEntry(key="c", value="3"),
     ]
+
+
+def test_entries_reject_non_string_key_or_value():
+    """Reject a key or value that is not a string."""
+    with pytest.raises(TypeError):
+        SetEntry(key=5, value="b")  # ty: ignore[invalid-argument-type]
+    with pytest.raises(TypeError):
+        SetEntry(key="b", value=[1, 2])  # ty: ignore[invalid-argument-type]
+    with pytest.raises(TypeError):
+        DeleteEntry(key=5)  # ty: ignore[invalid-argument-type]
 
 
 def test_append_after_repaired_truncation_stays_valid(wal, wal_path):
