@@ -41,23 +41,10 @@ class WalEntry:
         op = data.get("op")
         try:
             if op == "set":
-                key = data["key"]
-                value = data["value"]
-
-                if not isinstance(key, str):
-                    raise TypeError("key must be a string")
-                if not isinstance(value, str):
-                    raise TypeError("value must be a string")
-
-                return SetEntry(key=key, value=value)
+                return SetEntry(key=data["key"], value=data["value"])
 
             if op == "delete":
-                key = data["key"]
-
-                if not isinstance(key, str):
-                    raise TypeError("key must be a string")
-
-                return DeleteEntry(key=key)
+                return DeleteEntry(key=data["key"])
 
         except KeyError as e:
             raise ValueError(f"missing required field: {e}") from e
@@ -71,6 +58,13 @@ class SetEntry(WalEntry):
 
     key: str
     value: str
+
+    def __post_init__(self) -> None:
+        """Reject keys and values that are not strings."""
+        if not isinstance(self.key, str):
+            raise TypeError("key must be a string")
+        if not isinstance(self.value, str):
+            raise TypeError("value must be a string")
 
     def to_dict(self) -> dict:
         """Return the JSON-serializable representation of this entry."""
@@ -86,6 +80,11 @@ class DeleteEntry(WalEntry):
     """A write-ahead log entry recording that `key` was deleted."""
 
     key: str
+
+    def __post_init__(self) -> None:
+        """Reject keys that are not strings."""
+        if not isinstance(self.key, str):
+            raise TypeError("key must be a string")
 
     def to_dict(self) -> dict:
         """Return the JSON-serializable representation of this entry."""

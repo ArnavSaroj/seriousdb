@@ -77,6 +77,8 @@ class Cache:
 
         Raises
         ------
+        TypeError
+            If `key` or `value` is not a string.
         ServiceUnavailableError
             If no database has been loaded.
         OSError
@@ -137,6 +139,8 @@ class Cache:
 
         Raises
         ------
+        TypeError
+            If `key` is not a string.
         ResourceNotFoundError
             If `key` does not exist.
         ServiceUnavailableError

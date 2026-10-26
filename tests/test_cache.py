@@ -413,6 +413,30 @@ def test_delete_leaves_state_unchanged_when_wal_append_fails(db_path, monkeypatc
     assert reloaded.db["name"] == "Alice"
 
 
+def test_rejected_write_leaves_the_wal_healthy(db_path):
+    """A non-string write must be rejected, and must not lose later writes."""
+    cache = Cache()
+    cache.load(str(db_path))
+
+    assert cache.db is not None
+
+    cache.insert("a", "1")
+
+    with pytest.raises(TypeError):
+        cache.insert(5, "bad")  # ty: ignore[invalid-argument-type]
+    with pytest.raises(TypeError):
+        cache.insert("b", 2)  # ty: ignore[invalid-argument-type]
+
+    assert cache.db == {"a": "1"}
+
+    cache.insert("b", "2")
+
+    reloaded = Cache()
+    reloaded.load(str(db_path))
+
+    assert reloaded.db == {"a": "1", "b": "2"}
+
+
 def test_replay_repairs_torn_wal_before_later_appends(db_path):
     """Remove a torn final record so later WAL appends remain valid."""
     cache = Cache()
