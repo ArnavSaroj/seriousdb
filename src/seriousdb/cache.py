@@ -468,7 +468,7 @@ def _atomic_write_json(filename: str, data: dict[str, str]) -> None:
             tmp_file.flush()
             os.fsync(tmp_file.fileno())
         except Exception:
-            # Close the file handle before unlinking --Added for windows
+            # Close the file handle before unlinking --Added for windows compatibility
             tmp_file.close()
             os.unlink(tmp_file.name)
             raise
