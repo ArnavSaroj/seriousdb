@@ -472,6 +472,7 @@ def _atomic_write_json(filename: str, data: dict[str, str]) -> None:
             tmp_file.flush()
             os.fsync(tmp_file.fileno())
         except Exception:
+            tmp_file.close()#added for ensuring windows compatibility without this windows complain about permission error-File is locked for another process
             os.unlink(tmp_file.name)
             raise
     try:
